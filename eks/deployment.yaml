@@ -19,10 +19,7 @@ spec:
             - containerPort: 3000
           env:
             - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: db-secret
-                  key: DATABASE_URL
+              value: postgres://postgres:postgres@postgres:5432/fullstackschool
 ---
 apiVersion: v1
 kind: Service
