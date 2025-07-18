@@ -1,0 +1,26 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  publish_images:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # ✅ This line is required for OIDC!
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: build image
+        run: |
+          docker build . -t duybo95/dashboard:latest
+
+      - name: Push image to Docker Hub
+        run: |
+          docker login -u duybo95 -p ${{ secrets.DOCKER_HUB_TOKEN }}
+          docker push duybo95/dashboard:latest
