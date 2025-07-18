@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nextjs-app
+  template:
+    metadata:
+      labels:
+        app: nextjs-app
+    spec:
+      initContainers:
+        - name: migrate
+          image: duybo95/dashboard:lastest
+          command: ["npx", "prisma", "migrate", "deploy"]
+          env:
+            - name: DATABASE_URL
+              value: postgresql://myuser:mypassword@postgres-service:5432/mydb
+      containers:
+        - name: nextjs
+          image: duybo95/dashboard:lastest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DATABASE_URL
+              value: postgresql://myuser:mypassword@postgres-service:5432/mydb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextjs-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: nextjs-app
+  ports:
+    - port: 80
+      targetPort: 3000
