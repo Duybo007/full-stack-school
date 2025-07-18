@@ -36,8 +36,10 @@ spec:
               value: mypassword
             - name: POSTGRES_DB
               value: mydb
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
+            - mountPath: /var/lib/postgresql/data/pgdata
               name: postgres-storage
       volumes:
         - name: postgres-storage
