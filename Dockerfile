@@ -1,41 +1,26 @@
-# Use official Node.js image as base
-FROM node:18-alpine AS base
+# Use Node.js as the base image
+FROM node:18
 
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Install dependencies only with the needed files
+# Copy package.json and package-lock.json files
 COPY package*.json ./
-RUN npm ci --omit=dev
 
-# Copy Prisma files separately to leverage Docker cache
-COPY prisma ./prisma
+# Install dependencies
+RUN npm install
 
-# Copy the rest of the application
+# Copy the rest of the application code
 COPY . .
 
-# Generate the database
-RUN npx prisma generate
-RUN npx prisma migrate deploy
+# Generate Database
+RUN npx prisma migrate dev --name init
 
 # Build the Next.js application
 RUN npm run build
 
-# Use a smaller image for the final build
-FROM node:18-alpine AS runner
-
-# Set working directory
-WORKDIR /app
-
-# Copy only the necessary artifacts from the builder stage
-COPY --from=base /app/package.json ./
-COPY --from=base /app/.next ./.next
-COPY --from=base /app/public ./public
-COPY --from=base /app/node_modules ./node_modules
-COPY --from=base /app/prisma ./prisma
-
-# Expose port
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Start app in production mode
+# Start the Next.js application
 CMD ["npm", "start"]
